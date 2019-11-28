@@ -15,7 +15,7 @@ printf "*** Running the nix-build tests...\n" >& 2
 nix build $NIX_BUILD_ARGS \
    -I . -I .. \
    --option restrict-eval true \
-   --option allowed-uris "https://github.com/NixOS https://github.com/input-output-hk" \
+   --option allowed-uris "https://github.com/NixOS https://github.com/input-output-hk https://github.com/serokell" \
    --no-link --keep-going -f default.nix
 echo >& 2
 
