@@ -13,4 +13,6 @@
     (import ./armv6l-linux.nix)
     # Restore nixpkgs haskell and haskellPackages
     (_: super: { inherit (super.haskell-nix-super) haskell haskellPackages; })
+
+    (import ./nix-prefetch-git.nix)
 ]
