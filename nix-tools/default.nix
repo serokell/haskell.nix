@@ -37,11 +37,13 @@ let
         packages.nix-tools.src = src;
       }
 
-      ({ config, ...}: {
-        packages = {
-          Cabal.patches = [ cabalPatch ];
-        };
-      })
+      {
+        packages.Cabal.patches = [ cabalPatch ];
+      }
+
+      {
+        reinstallableLibGhc = true;
+      }
     ] ++ pkgs.lib.optional (args ? ghc) { ghc.package = args.ghc; };
   };
 
@@ -53,6 +55,7 @@ in
     name = "nix-tools";
     paths = builtins.attrValues hsPkgs.nix-tools.components.exes;
     buildInputs = [ makeWrapper ];
+    meta.platforms = lib.platforms.all;
     # We wrap the -to-nix executables with the executables from `tools` (e.g. nix-prefetch-git)
     # so that consumers of `nix-tools` won't have to provide those tools.
     postBuild = ''

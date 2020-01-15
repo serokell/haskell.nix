@@ -13,6 +13,8 @@
 
 , libiconv ? null, ncurses
 
+, installDeps
+
 , # GHC can be built with system libffi or a bundled one.
   libffi ? null
 
@@ -204,7 +206,7 @@ in let configured-src = stdenv.mkDerivation (rec {
         installPhase = "cp -r . $out";
     });
 
-in stdenv.mkDerivation (rec {
+  drv =stdenv.mkDerivation (rec {
   version = ghc-version;
   name = "${targetPrefix}ghc-${version}";
 
@@ -298,7 +300,7 @@ in stdenv.mkDerivation (rec {
       egrep --quiet '^#!' <(head -n 1 $i) || continue
       sed -i -e '2i export PATH="$PATH:${stdenv.lib.makeBinPath [ targetPackages.stdenv.cc.bintools coreutils ]}"' $i
     done
-  '';
+  '' + installDeps targetPrefix;
 
   passthru = {
     inherit bootPkgs targetPrefix;
@@ -326,4 +328,6 @@ in stdenv.mkDerivation (rec {
   dontStrip = true;
   dontPatchELF = true;
   noAuditTmpdir = true;
-})
+});
+
+in drv

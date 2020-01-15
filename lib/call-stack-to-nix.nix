@@ -5,8 +5,12 @@
  *
  * see also `call-cabal-project-to-nix`!
  */
-{ runCommand, nix-tools, pkgs, mkCacheFile }:
-{ src, stackYaml ? null, ignorePackageYaml ? false, cache ? null, ... }:
+{ runCommand, nix-tools, pkgs, mkCacheFile, materialize }:
+{ src, stackYaml ? null, ignorePackageYaml ? false, cache ? null
+, stack-sha256 ? null
+, materialized ? null # Location of a materialized copy of the nix files
+, checkMaterialization ? null # If true the nix files will be generated used to check plan-sha256 and material
+, ... }:
 let
   stackToNixArgs = builtins.concatStringsSep " " [
     "--full"
@@ -14,16 +18,24 @@ let
     (if ignorePackageYaml then "--ignore-package-yaml" else "")
     "-o ."
   ];
-  stack = runCommand "stack-to-nix-pkgs" {
+  stack = materialize ({
+    inherit materialized;
+    sha256 = stack-sha256;
+    sha256Arg = "stack-sha256";
+    reasonNotSafe = null;
+  } // pkgs.lib.optionalAttrs (checkMaterialization != null) {
+    inherit checkMaterialization;
+  }) (runCommand "stack-to-nix-pkgs" {
     nativeBuildInputs = [ nix-tools pkgs.nix-prefetch-git pkgs.cacert ];
     # Needed or stack-to-nix will die on unicode inputs
     LOCALE_ARCHIVE = pkgs.lib.optionalString (pkgs.stdenv.hostPlatform.libc == "glibc") "${pkgs.glibcLocales}/lib/locale/locale-archive";
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
+    preferLocalBuild = false;
   } (''
     mkdir -p $out
   '' + pkgs.lib.optionalString (cache != null) ''
-    cp ${mkCacheFile cache} $out/.stack-to-nix.cache
+    cp ${mkCacheFile cache}/.stack-to-nix.cache* $out
   '' + ''
     (cd $out && stack-to-nix ${stackToNixArgs})
 
@@ -35,5 +47,5 @@ let
 
     # move pkgs.nix to default.nix ensure we can just nix `import` the result.
     mv $out/pkgs.nix $out/default.nix
-  '');
+  ''));
 in { projectNix = stack; inherit src; sourceRepos = []; }

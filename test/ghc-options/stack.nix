@@ -1,4 +1,4 @@
-{ stdenv, stackProject', recurseIntoAttrs }:
+{ stdenv, stackProject', recurseIntoAttrs, haskellLib }:
 
 with stdenv.lib;
 
@@ -8,16 +8,23 @@ let
   };
   packages = project.hsPkgs;
 
+  # Get the names of all packages. This is a test to see
+  # whether there is a broken "$locals" package present.
+  hasIdentifier = p: p != null && p ? identifier;
+  packageNames = mapAttrsToList (name: p: p.identifier.name) (filterAttrs (name: hasIdentifier) packages);
+
 in recurseIntoAttrs {
-  inherit (project) stack-nix;
+  ifdInputs = {
+    inherit (project) stack-nix;
+  };
   run = stdenv.mkDerivation {
     name = "callStackToNix-test";
 
     buildCommand = ''
       printf "checking whether executable runs... " >& 2
-      cat ${packages.test-ghc-options.components.exes.test-ghc-options-exe.run}
+      cat ${haskellLib.check packages.test-ghc-options.components.exes.test-ghc-options-exe}
 
-      touch $out
+      echo '${concatStringsSep " " packageNames}' > $out
     '';
 
     meta.platforms = platforms.all;

@@ -1,6 +1,7 @@
 {
-  "url": "https://github.com/serokell/nix-tools",
-  "rev": "c948d8e50959e716fd0a70fc6bc00cf824881b0e",
-  "sha256": "1073bsfw7q7ydxsbcvbggaghm04wn95jyqny0hlnkm1nys1irkqw",
+  "url": "https://github.com/input-output-hk/nix-tools",
+  "rev": "e8eb66896933229987c1a26c28b21a6b363e3bd9",
+  "date": "2020-01-13T17:33:49+13:00",
+  "sha256": "0iqyniipz7gpy1ixrymk7ycgv65pdfk5aa0189a87mpflc08pcz4",
   "fetchSubmodules": false
 }
