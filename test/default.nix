@@ -1,4 +1,4 @@
-{ haskellNix ? import ../default.nix { inherit checkMaterialization; }
+{ haskellNix ? import ../default.nix { }
 , pkgs ? import nixpkgs nixpkgsArgs
 , nixpkgs ? haskellNix.sources.nixpkgs
 , nixpkgsArgs ? haskellNix.nixpkgsArgs
